@@ -5,7 +5,7 @@ matplotlib==3.10.9
 numpy==2.4.6
 osmnx==2.0.6
 pandas==3.0.3
-pyogrio==0.12.1
+pyogrio==0.13.0
 pyproj==3.7.2
 rasterio==1.5.0
 scikit-learn==1.8.0
