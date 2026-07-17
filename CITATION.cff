@@ -1,0 +1,34 @@
+cff-version: 1.2.0
+message: "If you use this software or its methods, please cite the accompanying article."
+type: software
+title: "North Aegean Hazard-Sprawl: RF-FLUS Cellular Automata and Multi-Hazard Exposure Modelling"
+version: 1.0.0
+date-released: 2026-07-18
+license: MIT
+authors:
+  - family-names: Eminoğlu
+    given-names: Yusuf
+    affiliation: "Dokuz Eylül University"
+    email: yusuf.eminoglu@deu.edu.tr
+  - family-names: Çubukçu
+    given-names: Kemal Mert
+    affiliation: "Dokuz Eylül University"
+keywords:
+  - cellular automata
+  - multi-hazard
+  - urban expansion
+  - Google Earth Engine
+  - reproducible research
+preferred-citation:
+  type: article
+  title: "Future Spatial Footprints of Natural Hazards: Modelling Demographic and Agricultural Asset Exposure through Cellular Automata and Cloud-Native Technologies in the North Aegean Basin, Türkiye"
+  authors:
+    - family-names: Eminoğlu
+      given-names: Yusuf
+    - family-names: Çubukçu
+      given-names: Kemal Mert
+  journal: "Urban Climate"
+  publisher:
+    name: Elsevier
+  year: 2026
+  notes: "Manuscript under review; DOI pending acceptance."

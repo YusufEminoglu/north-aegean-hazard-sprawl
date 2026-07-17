@@ -1,0 +1,16 @@
+model,criterion,weight,reported_CR
+Flood_A,HAND,0.216,0.001
+Flood_A,Slope,0.209,0.001
+Flood_A,River distance,0.209,0.001
+Flood_A,Elevation,0.105,0.001
+Flood_A,Clay content,0.105,0.001
+Flood_A,Maximum precipitation,0.105,0.001
+Flood_A,LULC permeability,0.051,0.001
+Flood_B,Water distance,0.30,0.012
+Flood_B,Elevation,0.25,0.012
+Flood_B,TPI,0.20,0.012
+Flood_B,NDVI,0.15,0.012
+Flood_B,NDWI,0.10,0.012
+Seismic,Fault proximity,0.40,0.000
+Seismic,PGA,0.40,0.000
+Seismic,Site amplification,0.20,0.000

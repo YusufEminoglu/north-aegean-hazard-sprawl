@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 320" role="img" aria-labelledby="title desc">
+  <title id="title">North Aegean Hazard-Sprawl</title>
+  <desc id="desc">An abstract coastal terrain crossed by urban growth and four hazard signals.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#071a2d"/>
+      <stop offset=".55" stop-color="#123f50"/>
+      <stop offset="1" stop-color="#0e6b69"/>
+    </linearGradient>
+    <linearGradient id="land" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#50c9a8" stop-opacity=".08"/>
+      <stop offset="1" stop-color="#d9f99d" stop-opacity=".42"/>
+    </linearGradient>
+    <filter id="glow"><feGaussianBlur stdDeviation="8"/></filter>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M32 0H0V32" fill="none" stroke="#bce8e3" stroke-opacity=".07"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="320" rx="24" fill="url(#bg)"/>
+  <rect width="1200" height="320" rx="24" fill="url(#grid)"/>
+  <path d="M620 306C691 272 691 217 757 203c69-14 84 25 149-7 55-27 65-84 125-105 54-19 105 1 169-41v270H620Z" fill="url(#land)"/>
+  <g fill="none" stroke="#9ee8d8" stroke-opacity=".28">
+    <path d="M604 298c83-37 79-91 151-111 75-21 98 23 157-9 50-27 67-80 122-100 57-21 109 4 166-43"/>
+    <path d="M620 318c91-37 92-79 157-99 78-24 101 17 158-15 56-31 69-77 116-95 56-22 94-7 149-33"/>
+    <path d="M703 320c66-37 64-67 119-81 64-16 87 16 138-13 47-27 56-64 104-80 48-17 88-4 136-28"/>
+  </g>
+  <g transform="translate(970 154)">
+    <circle r="92" fill="#ff6b6b" opacity=".08" filter="url(#glow)"/>
+    <circle r="76" fill="none" stroke="#ffcf66" stroke-width="2" stroke-dasharray="8 10" opacity=".75"/>
+    <circle r="54" fill="none" stroke="#ff7f6e" stroke-width="2" opacity=".72"/>
+    <circle r="32" fill="none" stroke="#78dce8" stroke-width="2" opacity=".72"/>
+    <circle r="8" fill="#f7f3d0"/>
+    <path d="M-86 18 86-26M-55-61 62 69" stroke="#f7f3d0" stroke-width="1.5" opacity=".35"/>
+  </g>
+  <g font-family="Inter,Segoe UI,Arial,sans-serif" fill="#f6fbfa">
+    <text x="64" y="93" font-size="18" letter-spacing="5" fill="#79e2cb">OPEN RESEARCH COMPANION</text>
+    <text x="64" y="157" font-size="48" font-weight="750">North Aegean</text>
+    <text x="64" y="210" font-size="48" font-weight="750">Hazard–Sprawl</text>
+    <text x="67" y="258" font-size="20" fill="#c6e6e1">Urban growth × compound hazard × 2050 planning</text>
+  </g>
+  <g transform="translate(64 282)" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="12">
+    <circle cx="5" cy="-4" r="5" fill="#78dce8"/><text x="18" fill="#c6e6e1">FLOOD</text>
+    <circle cx="105" cy="-4" r="5" fill="#ffcf66"/><text x="118" fill="#c6e6e1">SEISMIC</text>
+    <circle cx="222" cy="-4" r="5" fill="#b5e48c"/><text x="235" fill="#c6e6e1">BIO-CLIMATE</text>
+    <circle cx="368" cy="-4" r="5" fill="#ff7f6e"/><text x="381" fill="#c6e6e1">WILDFIRE</text>
+  </g>
+</svg>

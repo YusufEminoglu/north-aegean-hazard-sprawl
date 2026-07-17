@@ -1,0 +1,41 @@
+name: Bug report
+description: Report a reproducible problem in the analysis or documentation.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for helping make the workflow more reliable. Do not attach restricted provider data.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Include the script, stage, and observed behaviour.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Minimal reproduction
+      description: Commands, configuration names (never secrets), and the smallest shareable example.
+      render: shell
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: Windows/Linux/macOS, Python, GDAL, package environment
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Safety checks
+      options:
+        - label: I removed credentials, private Earth Engine IDs, and restricted data.
+          required: true

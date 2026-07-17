@@ -1,0 +1,38 @@
+name: Method or reproducibility question
+description: Ask about assumptions, provenance, or rerunning a stage.
+title: "[Method]: "
+labels: ["question"]
+body:
+  - type: dropdown
+    id: stage
+    attributes:
+      label: Workflow stage
+      options:
+        - LULC and preprocessing
+        - RF suitability and CA
+        - Flood hazard
+        - Seismic hazard
+        - Bio-climatic or wildfire hazard
+        - AHP fusion and sensitivity
+        - Exposure and figures
+        - Data provenance or licensing
+    validations:
+      required: true
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: Point to a file, parameter, equation, or provider record where possible.
+    validations:
+      required: true
+  - type: textarea
+    id: attempted
+    attributes:
+      label: What have you tried?
+  - type: checkboxes
+    id: boundary
+    attributes:
+      label: Data boundary
+      options:
+        - label: I will not upload third-party rasters or confidential credentials.
+          required: true

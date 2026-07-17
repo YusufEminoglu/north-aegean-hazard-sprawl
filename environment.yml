@@ -1,0 +1,10 @@
+name: north-aegean-hazard-sprawl
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - pip
+  - gdal
+  - libspatialindex
+  - pip:
+      - -r requirements.txt

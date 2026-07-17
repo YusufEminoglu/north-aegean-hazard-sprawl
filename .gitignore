@@ -1,0 +1,58 @@
+# Secrets and credentials
+.env
+.env.*
+!.env.example
+.netrc
+credentials*
+*service-account*.json
+*.json.key
+*.pem
+*.p12
+*.key
+
+# Third-party and generated spatial data
+data/00_external/
+data/01_raw/
+data/02_interim/
+data/03_processed/
+data/04_models/
+outputs/
+logs/
+*.tif
+*.tiff
+*.gpkg
+*.gdb/
+*.shp
+*.shx
+*.dbf
+*.prj
+*.cpg
+*.vrt
+*.nc
+*.hdf
+*.h5
+*.pkl
+*.joblib
+
+# Manuscripts and publisher files
+*.pdf
+*.docx
+*.tex
+*.zip
+
+# Python and tooling
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+
+# IDE and operating system
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
