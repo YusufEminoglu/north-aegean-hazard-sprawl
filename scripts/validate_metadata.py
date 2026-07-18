@@ -96,11 +96,11 @@ def resolve_site_link(link):
     if not clean or clean.startswith(("http://", "https://", "mailto:", "data:", "#")):
         return None
     if clean.startswith("figures/"):
-        return ROOT / clean
+        return ROOT / (".zenodo.json" if clean == "zenodo.json" else clean)
     if clean in {
-        "CITATION.cff", ".zenodo.json", "LICENSE", "LICENSE-docs", "NOTICE.md"
+        "CITATION.cff", ".zenodo.json", "zenodo.json", "LICENSE", "LICENSE-docs", "NOTICE.md"
     }:
-        return ROOT / clean
+        return ROOT / (".zenodo.json" if clean == "zenodo.json" else clean)
     return ROOT / "docs" / clean
 
 

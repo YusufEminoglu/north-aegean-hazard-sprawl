@@ -34,7 +34,8 @@ jobs:
           mkdir -p _site/figures
           cp -R docs/. _site/
           cp -R figures/png _site/figures/
-          cp CITATION.cff .zenodo.json LICENSE LICENSE-docs NOTICE.md _site/
+          cp CITATION.cff LICENSE LICENSE-docs NOTICE.md _site/
+          cp .zenodo.json _site/zenodo.json
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v5
         with:
