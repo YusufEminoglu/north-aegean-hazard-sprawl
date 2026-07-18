@@ -1,0 +1,28 @@
+{
+  "title": "North Aegean Hazard-Sprawl: RF-FLUS Cellular Automata and Multi-Hazard Exposure Modelling",
+  "creators": [
+    {
+      "name": "Eminoğlu, Yusuf",
+      "orcid": "0009-0005-6000-2934",
+      "affiliation": "Department of City and Regional Planning, Dokuz Eylül University; LUQAA - Lab of Urban Analytics and Quantitative Analysis"
+    },
+    {
+      "name": "Çubukçu, Kemal Mert",
+      "orcid": "0000-0003-3604-7014",
+      "affiliation": "Department of City and Regional Planning, Dokuz Eylül University; LUQAA - Lab of Urban Analytics and Quantitative Analysis"
+    }
+  ],
+  "description": "Open research companion for modelling 2050 urban expansion and demographic and agricultural asset exposure to flood, seismic, bio-climatic, and wildfire hazards in the North Aegean Basin, Türkiye.",
+  "keywords": [
+    "cellular automata",
+    "multi-hazard",
+    "urban expansion",
+    "Google Earth Engine",
+    "reproducible research",
+    "climate risk",
+    "Türkiye"
+  ],
+  "license": "MIT",
+  "upload_type": "software",
+  "access_right": "open"
+}

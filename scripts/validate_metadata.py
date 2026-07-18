@@ -1,34 +1,83 @@
-"""Validate citation metadata, parameter tables, and local site links."""
+"""Validate citation metadata, author identities, parameter tables, and links."""
 
 from __future__ import annotations
 
 import csv
+import json
 import re
 from pathlib import Path
 
 import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
+REPOSITORY_URL = "https://github.com/YusufEminoglu/north-aegean-hazard-sprawl"
+ORCIDS = {
+    "Yusuf Eminoğlu": "https://orcid.org/0009-0005-6000-2934",
+    "Kemal Mert Çubukçu": "https://orcid.org/0000-0003-3604-7014",
+}
+EXPECTED_FIGURES = {
+    "fig01_Baseline.png",
+    "fig02_Dynamics.png",
+    "fig03_Drivers.png",
+    "fig04_Suitability.png",
+    "fig05_CA_Scenarios.png",
+    "fig06_MultiHazard_Convergence.png",
+    "fig07_Sensitivity.png",
+    "fig08_Exposure.png",
+    "fig09_Demographic_Exposure.png",
+    "fig10_Policy_Synthesis.png",
+}
 
 
 def no_doi(value, location="root"):
     if isinstance(value, dict):
         for key, child in value.items():
             if key.lower() == "doi":
-                raise AssertionError(f"DOI field must remain absent before acceptance: {location}")
+                raise AssertionError(
+                    f"DOI field must remain absent before acceptance: {location}"
+                )
             no_doi(child, f"{location}.{key}")
     elif isinstance(value, list):
         for index, child in enumerate(value):
             no_doi(child, f"{location}[{index}]")
 
 
+def full_name(author):
+    return f"{author['given-names']} {author['family-names']}"
+
+
 def validate_citation():
     citation = yaml.safe_load((ROOT / "CITATION.cff").read_text(encoding="utf-8"))
     assert citation["cff-version"] == "1.2.0"
     assert citation["license"] == "MIT"
+    assert citation["repository-code"] == REPOSITORY_URL
     assert len(citation["authors"]) == 2
-    assert "under review" in citation["preferred-citation"]["notes"].lower()
+    actual = {full_name(author): author["orcid"] for author in citation["authors"]}
+    assert actual == ORCIDS
+    preferred = citation["preferred-citation"]
+    assert "under review" in preferred["notes"].lower()
+    preferred_orcids = {
+        full_name(author): author["orcid"] for author in preferred["authors"]
+    }
+    assert preferred_orcids == ORCIDS
     no_doi(citation)
+
+
+def validate_zenodo():
+    metadata = json.loads((ROOT / ".zenodo.json").read_text(encoding="utf-8"))
+    assert metadata["license"] == "MIT"
+    assert metadata["upload_type"] == "software"
+    assert metadata["access_right"] == "open"
+    actual = {
+        creator["name"]: "https://orcid.org/" + creator["orcid"]
+        for creator in metadata["creators"]
+    }
+    expected = {
+        "Eminoğlu, Yusuf": ORCIDS["Yusuf Eminoğlu"],
+        "Çubukçu, Kemal Mert": ORCIDS["Kemal Mert Çubukçu"],
+    }
+    assert actual == expected
+    no_doi(metadata)
 
 
 def validate_weights():
@@ -48,7 +97,9 @@ def resolve_site_link(link):
         return None
     if clean.startswith("figures/"):
         return ROOT / clean
-    if clean in {"CITATION.cff", "LICENSE", "LICENSE-docs", "NOTICE.md"}:
+    if clean in {
+        "CITATION.cff", ".zenodo.json", "LICENSE", "LICENSE-docs", "NOTICE.md"
+    }:
         return ROOT / clean
     return ROOT / "docs" / clean
 
@@ -76,14 +127,24 @@ def validate_readme_links():
         if not target.exists():
             missing.append(clean)
     assert not missing, "Missing README links:\n  " + "\n  ".join(missing)
+    for name, orcid in ORCIDS.items():
+        assert name in readme
+        assert orcid in readme
+
+
+def validate_figures():
+    actual = {path.name for path in (ROOT / "figures" / "png").glob("*.png")}
+    assert actual == EXPECTED_FIGURES
 
 
 def main():
     validate_citation()
+    validate_zenodo()
     validate_weights()
     validate_site_links()
     validate_readme_links()
-    print("Metadata validation passed.")
+    validate_figures()
+    print("Metadata validation passed: authors, ORCIDs, archive metadata, and links.")
 
 
 if __name__ == "__main__":

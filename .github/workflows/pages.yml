@@ -7,6 +7,7 @@ on:
       - "docs/**"
       - "figures/png/**"
       - "CITATION.cff"
+      - ".zenodo.json"
       - "LICENSE*"
       - "NOTICE.md"
       - ".github/workflows/pages.yml"
@@ -33,7 +34,7 @@ jobs:
           mkdir -p _site/figures
           cp -R docs/. _site/
           cp -R figures/png _site/figures/
-          cp CITATION.cff LICENSE LICENSE-docs NOTICE.md _site/
+          cp CITATION.cff .zenodo.json LICENSE LICENSE-docs NOTICE.md _site/
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v5
         with:

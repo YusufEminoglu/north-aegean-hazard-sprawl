@@ -175,6 +175,50 @@ figcaption { color: var(--muted); font-size: 12px; margin: 10px 4px 2px; }
 .gallery-item:hover img { transform: scale(1.04); opacity: .75; }
 .gallery-item span { position: absolute; left: 18px; bottom: 17px; padding: 7px 11px; color: white; border-radius: 999px; background: rgba(7,26,45,.78); font-size: 12px; font-weight: 700; backdrop-filter: blur(9px); }
 
+.authors-section {
+  max-width: 1236px;
+  margin: 0 auto;
+  padding: 120px clamp(24px,5vw,72px) 30px;
+}
+.author-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-top: 50px; }
+.author-card {
+  display: grid;
+  grid-template-columns: 76px 1fr;
+  gap: 22px;
+  padding: clamp(25px,3vw,38px);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: white;
+  box-shadow: 0 18px 55px rgba(7,26,45,.08);
+}
+.author-monogram {
+  display: grid;
+  place-items: center;
+  width: 70px;
+  height: 70px;
+  color: white;
+  border-radius: 22px;
+  background: linear-gradient(135deg,var(--teal),var(--mint));
+  font: 800 20px "Manrope",sans-serif;
+}
+.author-monogram.alt { color: var(--ink); background: linear-gradient(135deg,var(--sand),var(--lime)); }
+.author-role { margin: 1px 0 7px !important; color: var(--teal) !important; font: 700 10px "Manrope",sans-serif !important; letter-spacing: .14em; }
+.author-card h3 { margin: 0 0 10px; font-size: 25px; }
+.author-card p { margin: 0; color: var(--muted); font-size: 14px; }
+.profile-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+.profile-pills a {
+  padding: 7px 11px;
+  color: var(--deep);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  text-decoration: none;
+  font-size: 11px;
+  font-weight: 700;
+}
+.profile-pills a:first-child { color: #537a00; border-color: rgba(166,206,57,.55); background: rgba(166,206,57,.09); }
+.profile-pills a:hover { border-color: var(--teal); color: var(--teal); }
+footer a { color: inherit; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,.25); }
+
 .open-section { max-width: 1236px; margin: 120px auto; padding: clamp(32px,6vw,76px); display: grid; grid-template-columns: 1fr 1fr; gap: 32px 70px; color: white; border-radius: 30px; background: var(--ink); box-shadow: var(--shadow); }
 .open-section .eyebrow { color: var(--mint); }
 .open-section > p { color: #aac0c5; font-size: 17px; }
@@ -216,7 +260,51 @@ dialog img { max-height: calc(94vh - 28px); margin: auto; }
   .pipeline,.gallery { grid-template-columns: 1fr; }
   .gallery { grid-auto-rows: 250px; }
   .gallery-item.wide { grid-column: auto; }
-  .open-section { margin: 80px 20px; grid-template-columns: 1fr; }
+  .authors-section {
+  max-width: 1236px;
+  margin: 0 auto;
+  padding: 120px clamp(24px,5vw,72px) 30px;
+}
+.author-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-top: 50px; }
+.author-card {
+  display: grid;
+  grid-template-columns: 76px 1fr;
+  gap: 22px;
+  padding: clamp(25px,3vw,38px);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: white;
+  box-shadow: 0 18px 55px rgba(7,26,45,.08);
+}
+.author-monogram {
+  display: grid;
+  place-items: center;
+  width: 70px;
+  height: 70px;
+  color: white;
+  border-radius: 22px;
+  background: linear-gradient(135deg,var(--teal),var(--mint));
+  font: 800 20px "Manrope",sans-serif;
+}
+.author-monogram.alt { color: var(--ink); background: linear-gradient(135deg,var(--sand),var(--lime)); }
+.author-role { margin: 1px 0 7px !important; color: var(--teal) !important; font: 700 10px "Manrope",sans-serif !important; letter-spacing: .14em; }
+.author-card h3 { margin: 0 0 10px; font-size: 25px; }
+.author-card p { margin: 0; color: var(--muted); font-size: 14px; }
+.profile-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+.profile-pills a {
+  padding: 7px 11px;
+  color: var(--deep);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  text-decoration: none;
+  font-size: 11px;
+  font-weight: 700;
+}
+.profile-pills a:first-child { color: #537a00; border-color: rgba(166,206,57,.55); background: rgba(166,206,57,.09); }
+.profile-pills a:hover { border-color: var(--teal); color: var(--teal); }
+footer a { color: inherit; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,.25); }
+
+.open-section { margin: 80px 20px; grid-template-columns: 1fr; }
   footer { flex-direction: column; }
   footer p { text-align: left; }
 }

@@ -66,7 +66,7 @@ Method details are documented in [docs/methods.md](docs/methods.md), with the ex
 The fastest local setup uses Conda/Mamba:
 
 ~~~bash
-git clone https://github.com/YOUR-ORG/north-aegean-hazard-sprawl.git
+git clone https://github.com/YusufEminoglu/north-aegean-hazard-sprawl.git
 cd north-aegean-hazard-sprawl
 mamba env create -f environment.yml
 mamba activate north-aegean-hazard-sprawl
@@ -88,6 +88,7 @@ north-aegean-hazard-sprawl/
 ├── scripts/                AHP verification and pre-publication audit
 ├── docs/                   methods, provenance, reproducibility, project site
 ├── CITATION.cff            software and preferred article citation metadata
+├── .zenodo.json            archive-ready author and ORCID metadata
 ├── environment.yml         geospatial Conda environment
 └── requirements.txt        pinned Python environment
 ~~~
@@ -114,6 +115,13 @@ This repository makes the analysis logic inspectable, but it cannot legally or r
 2. Data-level rerun: users obtain the listed datasets under their original terms, authenticate with their own Earth Engine account, and populate ignored staging directories.
 
 The only full pairwise matrix released here is the four-component fusion matrix available in the archived revision package. Sub-component final weights and reported consistency ratios are included without reverse-engineering absent judgement matrices. See [docs/ahp_matrices.md](docs/ahp_matrices.md).
+
+## Authors
+
+| Author | Affiliation | Profiles |
+|---|---|---|
+| **Yusuf Eminoğlu** · corresponding author | Department of City and Regional Planning, Dokuz Eylül University; LUQAA — Lab of Urban Analytics and Quantitative Analysis | [![GitHub](https://img.shields.io/badge/GitHub-YusufEminoglu-181717?logo=github)](https://github.com/YusufEminoglu) [![ORCID](https://img.shields.io/badge/ORCID-0009--0005--6000--2934-a6ce39?logo=orcid)](https://orcid.org/0009-0005-6000-2934) [![ResearchGate](https://img.shields.io/badge/ResearchGate-profile-00ccbb?logo=researchgate)](https://www.researchgate.net/profile/Yusuf-Eminoglu?ev=hdr_xprf) [![AVESIS](https://img.shields.io/badge/AVESIS-DEU-004b8d)](https://avesis.deu.edu.tr/yusuf.eminoglu) |
+| **Kemal Mert Çubukçu** | Department of City and Regional Planning, Dokuz Eylül University; Founder, LUQAA — Lab of Urban Analytics and Quantitative Analysis | [![ORCID](https://img.shields.io/badge/ORCID-0000--0003--3604--7014-a6ce39?logo=orcid)](https://orcid.org/0000-0003-3604-7014) [![ResearchGate](https://img.shields.io/badge/ResearchGate-profile-00ccbb?logo=researchgate)](https://www.researchgate.net/profile/K-Mert-Cubukcu) [![AVESIS](https://img.shields.io/badge/AVESIS-DEU-004b8d)](https://avesis.deu.edu.tr/mert.cubukcu) |
 
 ## Citation
 

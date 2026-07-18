@@ -12,6 +12,7 @@ REQUIRED = {
     "LICENSE",
     "LICENSE-docs",
     "CITATION.cff",
+    ".zenodo.json",
     "docs/data_sources.md",
     "docs/methods.md",
     "docs/ahp_matrices.md",
@@ -23,7 +24,7 @@ FORBIDDEN_SUFFIXES = {
 SKIP_DIRS = {".git", ".venv", "__pycache__", ".pytest_cache"}
 TEXT_SUFFIXES = {
     "", ".py", ".md", ".txt", ".csv", ".cff", ".yml", ".yaml",
-    ".toml", ".html", ".css", ".js", ".svg", ".example",
+    ".toml", ".json", ".html", ".css", ".js", ".svg", ".example",
 }
 CHECKS = {
     "absolute user path": re.compile(
