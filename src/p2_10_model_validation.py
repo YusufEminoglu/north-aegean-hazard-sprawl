@@ -111,9 +111,43 @@ def rf_diagnostics():
     print(f"rf_spatial_block_auc_max,{max(aucs):.3f}")
 
 
+def _pontius_stats(domain, observed_change, simulated_change):
+    hits = np.sum(observed_change & simulated_change)
+    misses = np.sum(observed_change & ~simulated_change)
+    false_alarms = np.sum(~observed_change & simulated_change & domain)
+    correct_persistence = np.sum(~observed_change & ~simulated_change & domain)
+    fom = hits / (hits + misses + false_alarms)
+    oa = (hits + correct_persistence) / domain.sum()
+    kappa = cohen_kappa_score(
+        observed_change[domain].astype(np.uint8),
+        simulated_change[domain].astype(np.uint8),
+    )
+    n_dom = domain.sum()
+    n_obs_change = hits + misses
+    n_sim_change = hits + false_alarms
+    quantity_dis = abs(n_sim_change - n_obs_change) / n_dom
+    total_dis = (misses + false_alarms) / n_dom
+    allocation_dis = max(total_dis - quantity_dis, 0.0)
+    return dict(fom=fom, oa=oa, kappa=kappa, quantity_dis=quantity_dis,
+                allocation_dis=allocation_dis)
+
+
 def ca_hindcast():
-    """Evaluate change allocation from the 2000 state to observed 2020."""
-    print("[B] CA hindcast 2000–2020")
+    """Evaluate change allocation from the 2000 state to observed 2020.
+
+    Reports two variants. The RF suitability surface used for the 2050
+    projection is trained on 2020-vintage drivers, including distance to the
+    *2020* urban footprint; reusing that surface unmodified to hindcast
+    2000->2020 growth lets the model see where the 2020 urban edge already is
+    before "predicting" the very growth that produced that edge - an
+    endpoint-information leak, not a genuine out-of-sample test. The
+    "endpoint-informed" variant below reproduces that (kept for transparency,
+    not treated as the primary validation result); the "leakage-free" variant
+    substitutes a distance-to-urban layer computed from the *2000*
+    classification alone for this one run, holding the trained suitability
+    model and every other (time-invariant) driver fixed.
+    """
+    print("[B] CA hindcast 2000-2020")
     drivers, _ = p2_04.load_drivers()
     lulc_2000, _ = read_raster(PROCESSED / "lulc_simplified_2000.tif")
     lulc_2020, _ = read_raster(PROCESSED / "lulc_simplified_2020.tif")
@@ -121,15 +155,10 @@ def ca_hindcast():
     with open(MODELS / "rf_flus_model.pkl", "rb") as stream:
         model = pickle.load(stream)
     valid = np.isfinite(lulc_2020) & (lulc_2020 > 0) & (lulc_2020 != 4)
-    suitability = np.zeros(lulc_2020.shape, np.float32)
-    suitability[valid] = model.predict_proba(drivers[valid])[:, 1]
 
     urban_2000 = int(np.sum(lulc_2000 == 1))
     urban_2020 = int(np.sum(lulc_2020 == 1))
     mask = (np.isfinite(lulc_2000) & (lulc_2000 != 4)).astype(np.float32)
-    simulated = p2_04.run_ca_simulation(
-        lulc_2000, suitability, urban_2000, urban_2020, mask, random_seed=42
-    )
 
     domain = (
         np.isfinite(lulc_2000)
@@ -139,21 +168,40 @@ def ca_hindcast():
         & (lulc_2020 != 4)
     )
     observed_change = domain & (lulc_2020 == 1)
-    simulated_change = domain & (simulated == 1)
-    hits = np.sum(observed_change & simulated_change)
-    misses = np.sum(observed_change & ~simulated_change)
-    false_alarms = np.sum(~observed_change & simulated_change & domain)
-    correct_persistence = np.sum(~observed_change & ~simulated_change & domain)
 
-    fom = hits / (hits + misses + false_alarms)
-    oa = (hits + correct_persistence) / domain.sum()
-    kappa = cohen_kappa_score(
-        observed_change[domain].astype(np.uint8),
-        simulated_change[domain].astype(np.uint8),
+    # --- (i) endpoint-informed: 2020-vintage drivers throughout ---
+    suitability_ei = np.zeros(lulc_2020.shape, np.float32)
+    suitability_ei[valid] = model.predict_proba(drivers[valid])[:, 1]
+    simulated_ei = p2_04.run_ca_simulation(
+        lulc_2000, suitability_ei, urban_2000, urban_2020, mask, random_seed=42
     )
-    print(f"flus_fom,{100 * fom:.1f}")
-    print(f"flus_oa,{100 * oa:.1f}")
-    print(f"flus_kappa,{kappa:.3f}")
+    stats_ei = _pontius_stats(domain, observed_change, domain & (simulated_ei == 1))
+
+    # --- (ii) leakage-free: swap urban_dist for its 2000-vintage version ---
+    urban_dist_idx = p2_04.DRIVER_NAMES.index("urban_dist")
+    urban_dist_2000, _ = read_raster(PROCESSED / "drivers" / "driver_urban_dist_2000.tif")
+    drivers_lf = drivers.copy()
+    drivers_lf[..., urban_dist_idx] = np.nan_to_num(urban_dist_2000, nan=0.0)
+    suitability_lf = np.zeros(lulc_2020.shape, np.float32)
+    suitability_lf[valid] = model.predict_proba(drivers_lf[valid])[:, 1]
+    simulated_lf = p2_04.run_ca_simulation(
+        lulc_2000, suitability_lf, urban_2000, urban_2020, mask, random_seed=42
+    )
+    stats_lf = _pontius_stats(domain, observed_change, domain & (simulated_lf == 1))
+
+    print("  -- endpoint-informed (2020-vintage urban_dist throughout) --")
+    print(f"flus_fom_endpoint_informed,{100 * stats_ei['fom']:.1f}")
+    print(f"flus_oa_endpoint_informed,{100 * stats_ei['oa']:.1f}")
+    print(f"flus_kappa_endpoint_informed,{stats_ei['kappa']:.3f}")
+    print(f"flus_quantity_dis_endpoint_informed,{100 * stats_ei['quantity_dis']:.1f}")
+    print(f"flus_allocation_dis_endpoint_informed,{100 * stats_ei['allocation_dis']:.1f}")
+
+    print("  -- leakage-free (2000-vintage urban_dist) - PRIMARY RESULT --")
+    print(f"flus_fom,{100 * stats_lf['fom']:.1f}")
+    print(f"flus_oa,{100 * stats_lf['oa']:.1f}")
+    print(f"flus_kappa,{stats_lf['kappa']:.3f}")
+    print(f"flus_quantity_dis,{100 * stats_lf['quantity_dis']:.1f}")
+    print(f"flus_allocation_dis,{100 * stats_lf['allocation_dis']:.1f}")
 
 
 def flood_validation():

@@ -112,24 +112,32 @@ def compute_coast_dist(ref_meta: dict, shape: tuple) -> np.ndarray:
     return dist_m.astype(np.float32)
 
 
-def compute_urban_dist(ref_meta: dict, shape: tuple) -> np.ndarray:
+def compute_urban_dist(ref_meta: dict, shape: tuple, year: int = 2020) -> np.ndarray:
     """
-    Derive distance-to-nearest-urban-centre from the simplified LULC 2020 raster.
-    Urban class = 1 (see p2_02_lulc_timeseries.py reclassification).
-    Falls back to GLAD 2020 if simplified LULC not yet produced.
+    Derive distance-to-nearest-urban-centre from the simplified LULC raster of
+    the given year. Urban class = 1 (see p2_02_lulc_timeseries.py
+    reclassification). year=2020 falls back to GLAD 2020 if the simplified
+    LULC is not yet produced; year=2000 requires lulc_simplified_2000.tif.
+
+    A 2000-vintage version of this driver exists so the CA hindcast
+    (p2_10_model_validation.py, 2000->2020) does not condition on urban_dist
+    computed from the 2020 endpoint it is trying to predict: reusing the 2020
+    urban_dist there is a temporal-leakage channel, since distance-to-2020-
+    urban already encodes where the 2020 urban edge sits, which trivially
+    correlates with 2000-2020 growth adjacent to that edge.
     """
-    simplified_path = PROCESSED / "lulc_simplified_2020.tif"
-    fallback_path   = INTERIM / "p2_glad_lulc_2020_clipped.tif"
+    simplified_path = PROCESSED / f"lulc_simplified_{year}.tif"
+    fallback_path   = INTERIM / f"p2_glad_lulc_{year}_clipped.tif"
 
     if simplified_path.exists():
         lulc_path = simplified_path
         urban_class = 1
-    elif fallback_path.exists():
+    elif year == 2020 and fallback_path.exists():
         lulc_path = fallback_path
         urban_class = 7  # GLAD GLCLU built-up approximate class
-        print("  [urban_dist] Using GLAD GLCLU 2020 fallback")
+        print(f"  [urban_dist_{year}] Using GLAD GLCLU {year} fallback")
     else:
-        print("  [urban_dist] No LULC available - setting uniform 50 km")
+        print(f"  [urban_dist_{year}] No LULC available - setting uniform 50 km")
         return np.full(shape, 50000.0, dtype=np.float32)
 
     with rasterio.open(lulc_path) as src:
@@ -200,9 +208,17 @@ def build_derived_drivers(ref_meta: dict, shape: tuple):
 
     # Driver 11 - urban_dist
     print("  Computing urban_dist ...")
-    urban_arr = compute_urban_dist(ref_meta, shape)
+    urban_arr = compute_urban_dist(ref_meta, shape, year=2020)
     p = save_derived_driver(urban_arr, "urban_dist", ref_meta)
     print(f"  OK  urban_dist -> {p.name}  range=[{urban_arr.min():.0f}, {urban_arr.max():.0f}] m")
+
+    # Driver 11, 2000-vintage - used only by the leakage-free CA hindcast
+    # validation (p2_10_model_validation.py), never by the production 2050
+    # suitability model.
+    print("  Computing urban_dist_2000 (hindcast-only) ...")
+    urban_arr_2000 = compute_urban_dist(ref_meta, shape, year=2000)
+    p = save_derived_driver(urban_arr_2000, "urban_dist_2000", ref_meta)
+    print(f"  OK  urban_dist_2000 -> {p.name}  range=[{urban_arr_2000.min():.0f}, {urban_arr_2000.max():.0f}] m")
 
 
 def verify_drivers():
