@@ -109,6 +109,17 @@ adopted sub-weights; it is not an independent expert re-elicitation, and
 `data/ahp/subcomponent_weights.csv`'s `reported_CR` column is labelled
 accordingly.
 
+## Additional analyses
+
+- `src/p2_11_dsi_masterplan_ingest.py` clips the DSİ (State Hydraulic Works) Kuzey Ege Havzası Master Plan layers (historical floods, delineated flood-prone areas, protected areas, water-source protection buffers, mapped faults) to the basin. The source shapefiles are restricted-distribution government data and are not included in this repository; set `DSI_SOURCE_DIR` to a local copy to run it.
+- `src/p2_12_wildfire_seismic_validation.py` checks the wildfire and seismic hazard components against sources independent of their own inputs: GEE FIRMS thermal-anomaly detections (wildfire, including the per-sub-input GABAM/EVI/canopy-height decomposition referenced above) and the USGS historical earthquake catalogue (seismic, reported as epicentre density, not damage records).
+- `src/p2_13_uncertainty_propagation.py` propagates AHP weight uncertainty (500 Dirichlet-perturbed draws around the indicative weights) through the fixed Jenks classification into a 90% interval on basin/BAU/ECO high-hazard share, HCI, and ERR, rather than reporting only the four discrete named schemes.
+- `src/p2_14_markov_demand_rerun.py` reruns BAU/ECO under the Markov demand pathway end to end (not just projected, but actually simulated) and reports HCI/ERR/high-hazard exposure under both demand levels side by side, to test rather than assert demand-invariance.
+- `src/p2_15_eco_penalty_grounding.py` checks how much of the DSİ's official water-source protection buffers and protected areas already fall inside the ECO scenario's penalised zones, and how much BAU vs. ECO new growth intrudes into them — a data-grounded check on the penalty multipliers independent of their assumed values.
+- `src/p2_fig11_prioritization.py`, `p2_fig12_wildfire_subcomponents.py`, and `p2_fig13_location_map.py` generate the corresponding supplementary figures from the above.
+
+`p2_fig07_sensitivity.py`'s W3/W4 weight vectors and its Spearman correlation-matrix inset are computed on the same 200,000-pixel SRTM-masked sample as `p2_16_ahp_full_verification.py` uses for `sensitivity_correlations.csv`, rather than a separately (and previously divergently) sampled full-basin computation.
+
 ## Determinism
 
 RF and CA stochastic components use seed 42. Geospatial results still depend on the exact provider vintages and the GDAL/PROJ stack, so the environment files are pinned and provenance should be recorded for each rerun.

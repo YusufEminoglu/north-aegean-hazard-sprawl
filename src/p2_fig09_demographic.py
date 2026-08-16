@@ -203,6 +203,23 @@ def create_fig09():
             exposure[g]["bau"].append(float(np.nansum(hrsl[g][new_bau & cls_mask])))
             exposure[g]["eco"].append(float(np.nansum(hrsl[g][new_eco & cls_mask])))
 
+    # Real HRSL "Total"-group exposed population per hazard class, both
+    # scenarios - feeds the manuscript's demographic exposure table.
+    print("\n  Exposed population by hazard class (HRSL Total, real raster sum):")
+    for sc_label in ["bau", "eco"]:
+        vals = exposure["Total"][sc_label]
+        for cls, v in zip(classes, vals):
+            print(f"    {sc_label.upper()} class {cls}: {v:,.0f}")
+            print(f"{sc_label}_pop_exposed_class{cls},{v:.0f}")
+        total_v = sum(vals)
+        print(f"    {sc_label.upper()} total: {total_v:,.0f}")
+        print(f"{sc_label}_pop_exposed,{total_v:.0f}")
+    bau_vals, eco_vals = exposure["Total"]["bau"], exposure["Total"]["eco"]
+    for cls_idx, cls in enumerate(classes):
+        b, e = bau_vals[cls_idx], eco_vals[cls_idx]
+        pop_err = (b - e) / b * 100 if b > 0 else 0.0
+        print(f"pop_err_class{cls},{pop_err:.1f}")
+
     # Agricultural loss (for inset)
     pixel_ha = (30 * 30) / 10_000.0
     agri_mask = (lulc2020 == 2) & valid if lulc2020 is not None else np.zeros_like(valid, bool)

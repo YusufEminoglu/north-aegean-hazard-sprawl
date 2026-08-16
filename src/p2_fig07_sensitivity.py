@@ -23,6 +23,21 @@ from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from pathlib import Path
 import itertools
 import jenkspy
+import importlib.util
+
+# Hazard-raster loading/normalisation is the single-source-of-truth version in
+# p2_09_multi_hazard_fusion.py. This script previously carried its own
+# duplicate copy of load_aligned()/normalise() and computed the Spearman
+# correlation matrix over the full LULC-masked basin, which silently diverged
+# from what p2_16_ahp_full_verification.py (and therefore data/ahp/
+# sensitivity_correlations.csv) reports for the same six pairs, because
+# p2_16 samples 200,000 pixels against p2_09's own SRTM-based mask, not the
+# full LULC-based one. Importing p2_09 directly and replicating its exact
+# sampling removes that drift.
+_HERE = Path(__file__).resolve().parent
+_spec = importlib.util.spec_from_file_location("p2_09", _HERE / "p2_09_multi_hazard_fusion.py")
+p2_09 = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(p2_09)
 
 plt.rcParams.update({
     "font.family": "sans-serif", "font.sans-serif": ["Arial"],
@@ -47,11 +62,19 @@ BOUNDARY_ILCE = "#636e72"
 HAZARD_KEYS   = ["flood", "seismic", "bioclimate", "wildfire"]
 HAZARD_LABELS = ["Flood", "Seismic", "Bio-Climate", "Wildfire"]
 
+# W3/W4 are genuinely computed (not hand-picked) by
+# p2_16_ahp_full_verification.py: W3 = Rank-Order-Centroid weights over a
+# validation-strength rank (flood > seismic > bioclimate > wildfire); W4 =
+# absolute PC1 loadings of the four normalised hazard rasters. Values below
+# must match that script's printed w3_*/w4_* keys -- this dict previously
+# still held placeholder "author-chosen" values after p2_16 replaced them
+# with real ones elsewhere in this repository, an inconsistency caught and
+# fixed alongside the correlation-matrix sampling fix below.
 WEIGHT_SCHEMES = {
-    "W1 AHP\n(primary)":    [0.35, 0.35, 0.20, 0.10],
+    "W1 AHP\n(indicative)": [0.35, 0.35, 0.20, 0.10],
     "W2 Equal\nweight":     [0.25, 0.25, 0.25, 0.25],
-    "W3 Rank\nbased":       [0.39, 0.39, 0.13, 0.10],
-    "W4 PCA\nderived":      [0.07, 0.81, 0.10, 0.02],
+    "W3 Rank\nbased":       [0.5208, 0.2708, 0.1458, 0.0625],
+    "W4 PCA\nderived":      [0.0596, 0.8925, 0.0289, 0.0190],
 }
 SCHEME_COLORS = [elite_cmap(v) for v in [0.9, 0.6, 0.3, 0.05]]
 
@@ -268,13 +291,41 @@ def create_fig07():
         surfaces[name] = s
         ordinals[name] = jenks_ordinal(s, valid)
 
-    # Spearman correlation matrix
+    # Spearman correlation matrix, displayed in the inset. Computed on the
+    # identical 200k-pixel seeded sample (rng seed 42, over p2_09.REF_PATH's
+    # own SRTM-based valid mask, normalised against that same mask) that
+    # p2_16_ahp_full_verification.py uses for data/ahp/sensitivity_
+    # correlations.csv, rather than the full LULC-masked basin used for the
+    # map panel above, so these numbers are the same numbers, not merely
+    # close to them.
     scheme_names = list(WEIGHT_SCHEMES.keys())
-    n    = len(scheme_names)
-    flat = np.column_stack([surfaces[nm][valid].ravel() for nm in scheme_names])
+    n = len(scheme_names)
+
+    with rasterio.open(p2_09.REF_PATH) as _sref:
+        _sref_arr, _sref_nodata = _sref.read(1), _sref.nodata
+    valid_sample = (_sref_arr != _sref_nodata) if _sref_nodata is not None else np.ones(_sref_arr.shape, bool)
+    _ref_meta_srtm = {"height": _sref_arr.shape[0], "width": _sref_arr.shape[1]}
+    with rasterio.open(p2_09.REF_PATH) as _sref2:
+        _ref_meta_srtm["transform"] = _sref2.transform
+        _ref_meta_srtm["crs"] = _sref2.crs
+    normed_sample = {
+        key: p2_09.normalize(p2_09.load_aligned(PROCESSED / f"{key}_hazard.tif", _ref_meta_srtm), valid_sample)
+        for key in HAZARD_KEYS
+    }
+
+    sample_rng   = np.random.default_rng(42)
+    n_valid      = int(valid_sample.sum())
+    sample_idx   = sample_rng.choice(n_valid, min(200_000, n_valid), replace=False)
+    vrows, vcols = np.where(valid_sample)
+    srows, scols = vrows[sample_idx], vcols[sample_idx]
+    sampled = {
+        name: sum(np.nan_to_num(normed_sample[k][srows, scols], nan=0.0) * w
+                  for k, w in zip(HAZARD_KEYS, np.asarray(weights, dtype=float) / sum(weights)))
+        for name, weights in WEIGHT_SCHEMES.items()
+    }
     corr_mat = np.eye(n)
     for i, j in itertools.combinations(range(n), 2):
-        xi, xj = flat[:, i], flat[:, j]
+        xi, xj = sampled[scheme_names[i]], sampled[scheme_names[j]]
         ok = np.isfinite(xi) & np.isfinite(xj)
         r, _ = spearmanr(xi[ok], xj[ok])
         corr_mat[i, j] = corr_mat[j, i] = float(r)
@@ -321,9 +372,15 @@ def create_fig07():
     ax_radar.set_xticks(angles_base)
     ax_radar.set_xticklabels(HAZARD_LABELS, fontsize=10,
                               color=BOUNDARY_IL, fontweight="bold")
-    ax_radar.set_ylim(0, 0.5)
-    ax_radar.set_yticks([0.1, 0.2, 0.3, 0.4, 0.5])
-    ax_radar.set_yticklabels(["0.1", "0.2", "0.3", "0.4", "0.5"],
+    # Radial limit must cover the largest weight across ALL schemes -- W4's
+    # real PCA loading (Seismic 0.8925) was being clipped by a fixed 0-0.5
+    # axis left over from when every scheme's max weight was <=0.39.
+    radial_max = max(max(w) for w in WEIGHT_SCHEMES.values())
+    radial_top = np.ceil(radial_max * 10) / 10 + 0.1
+    yticks = np.arange(0.2, radial_top, 0.2)
+    ax_radar.set_ylim(0, radial_top)
+    ax_radar.set_yticks(yticks)
+    ax_radar.set_yticklabels([f"{v:.1f}" for v in yticks],
                               fontsize=7.5, color="#95a5a6")
     ax_radar.grid(color="#b2bec3", linestyle="--", linewidth=0.6, alpha=0.55)
     ax_radar.spines["polar"].set_visible(False)
