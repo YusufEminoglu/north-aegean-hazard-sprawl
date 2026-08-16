@@ -1,5 +1,5 @@
 criterion,W1_AHP,W2_equal,W3_rank_based,W4_PCA
-Flood,0.35,0.25,0.39,0.07
-Seismic,0.35,0.25,0.39,0.81
-Bio-climatic,0.20,0.25,0.13,0.10
-Wildfire,0.10,0.25,0.10,0.02
+Flood,0.35,0.25,0.5208,0.0596
+Seismic,0.35,0.25,0.2708,0.8925
+Bio-climatic,0.20,0.25,0.1458,0.0289
+Wildfire,0.10,0.25,0.0625,0.0190

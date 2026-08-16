@@ -1,7 +1,7 @@
 scheme_a,scheme_b,spearman_rho,kendall_tau
-W1_AHP,W2_equal,0.983,0.893
-W1_AHP,W3_rank,0.997,0.958
-W1_AHP,W4_PCA,0.979,0.882
-W2_equal,W3_rank,0.980,0.881
-W2_equal,W4_PCA,0.960,0.835
-W3_rank,W4_PCA,0.981,0.881
+W1_AHP,W2_equal,0.990,0.916
+W1_AHP,W3_rank,0.974,0.868
+W1_AHP,W4_PCA,0.981,0.915
+W2_equal,W3_rank,0.959,0.828
+W2_equal,W4_PCA,0.968,0.862
+W3_rank,W4_PCA,0.921,0.796

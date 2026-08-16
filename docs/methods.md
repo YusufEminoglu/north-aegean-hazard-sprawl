@@ -89,16 +89,25 @@ fresh end-to-end run and update.
 - The maximum-CSI operating point is reported separately: POD 0.137, FAR 0.860, CSI 0.074.
 - GFD prevalence rises from 0.152% in class 1 to 3.827% in class 5, a 25.2-fold enrichment.
 - Fusion robustness is evaluated with AHP, equal, rank-based, and PCA-derived schemes (`data/ahp/weight_schemes.csv`, `sensitivity_correlations.csv`).
-- The minimum pairwise Spearman correlation is 0.960; minimum Kendall τ is 0.835.
+- The minimum pairwise Spearman correlation is 0.921; minimum Kendall τ is 0.796 (W3 rank-based vs. W4 PCA-derived, the two most divergent schemes).
 
-**Caveat (flagged for a future revision of this repository):** the rank-based
-and PCA-derived weight vectors in `weight_schemes.csv`, and the correlation
-statistics in `sensitivity_correlations.csv`, are not currently produced by
-any script in `src/` — `p2_fig07_sensitivity.py` reads them as hardcoded
-constants rather than deriving them from a PCA or rank-correlation procedure
-run against the component hazard rasters. Until a generating script is added
-and its output regenerated and committed, treat these two files as indicative
-rather than verified.
+**Resolved:** `src/p2_16_ahp_full_verification.py` now generates both files
+from real computation rather than asserting them. W3 (rank-based) uses
+Rank-Order-Centroid weights (Barron & Barrett, 1996) over a rank ordering of
+the four components by the independent-validation strength established
+elsewhere in this repository (flood > seismic > bio-climatic, unvalidated >
+wildfire, anti-correlated). W4 (PCA-derived) takes the absolute, renormalised
+loadings of the first principal component of the four normalised hazard
+rasters (PC1 explains ~74% of variance and is dominated by seismic — a real,
+somewhat striking result, since seismic hazard has by far the sharpest
+spatial gradients of the four components). The same script also reconstructs
+the flood Model A/B and seismic sub-component pairwise matrices via
+`a_ij = w_i / w_j` from their already-published weight vectors — the unique
+perfectly consistent Saaty matrix reproducing a given weight vector exactly
+(CR = 0 by construction). This states the judgment matrix consistent with the
+adopted sub-weights; it is not an independent expert re-elicitation, and
+`data/ahp/subcomponent_weights.csv`'s `reported_CR` column is labelled
+accordingly.
 
 ## Determinism
 
