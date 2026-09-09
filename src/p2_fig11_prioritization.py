@@ -82,14 +82,25 @@ def create_fig11() -> None:
     m = (lulc2020 > 0) & (lulc2020 != 4)
     dev_pressure[m] = rf.predict_proba(drivers[m])[:, 1]
 
+    # R3 fix (Reviewer 2, point 6 audit): the previous loader did not declare
+    # the source nodata value to `reproject`, so bilinear resampling blended
+    # the HRSL raster's -9999 sentinel into neighbouring valid cells (the
+    # same defect class as the wildfire nodata bug fixed for
+    # p2_08_wildfire_hazard.py), which dragged norm01()'s min() far below the
+    # true data range and compressed nearly every real population value into
+    # a thin sliver near 1.0. The HRSL source also mixes literal NaN with its
+    # declared -9999 sentinel; both are now mapped to NaN by `dst_nodata`
+    # below, then explicitly treated as 0 (no population/NTL recorded)
+    # rather than left as NaN, so a data gap in one criterion no longer
+    # removes a pixel from the composite score.
     def load_aligned(path, resampling=Resampling.bilinear):
-        dst = np.zeros((ref_meta["height"], ref_meta["width"]), dtype=np.float32)
+        dst = np.full((ref_meta["height"], ref_meta["width"]), np.nan, dtype=np.float32)
         with rasterio.open(path) as src:
             reproject(source=rasterio.band(src, 1), destination=dst,
                       src_transform=src.transform, src_crs=src.crs,
                       dst_transform=ref_meta["transform"], dst_crs=ref_meta["crs"],
-                      resampling=resampling)
-        return dst
+                      resampling=resampling, src_nodata=src.nodata, dst_nodata=np.nan)
+        return np.where(np.isfinite(dst), dst, 0.0).astype(np.float32)
 
     pop = load_aligned(INTERIM / "p2_hrsl_pop_general_clipped.tif")
     ntl = load_aligned(PROCESSED / "drivers" / "driver_ntl.tif")

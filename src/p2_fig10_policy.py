@@ -3,7 +3,7 @@ Paper 2 — Figure 10: Policy Synthesis
 ======================================
 (a) No-Build Zones     — BAU new growth pixels in high/very-high hazard areas
 (b) NbS Priority Areas — composite score: canopy deficit + flood + bio-climatic
-(c) ECO Effectiveness  — spatial risk avoided vs BAU
+(c) ECO vs BAU         — spatial high-hazard growth avoided under ECO
 
 Style: elite colormap, hillshade, admin boundaries, scale/north — matching fig06/fig07.
 """
@@ -381,14 +381,14 @@ def create_fig10():
     eco_safe_ha = float((new_eco & ~high_haz & valid).sum()) * pixel_ha
     eco_risk_ha = float((new_eco & high_haz  & valid).sum()) * pixel_ha
     stats_box(axes[2],
-              f"Risk avoided (vs BAU) : {saved_ha:,.0f} ha\n"
-              f"ECO safe growth        : {eco_safe_ha:,.0f} ha\n"
-              f"ECO remaining risk     : {eco_risk_ha:,.0f} ha",
+              f"High-hazard growth avoided (vs BAU): {saved_ha:,.0f} ha\n"
+              f"ECO growth outside high-hazard      : {eco_safe_ha:,.0f} ha\n"
+              f"ECO growth remaining in high-hazard  : {eco_risk_ha:,.0f} ha",
               loc="upper right")
 
-    leg_c = [Patch(facecolor=elite_cmap(0.35), label="ECO — safe growth"),
-             Patch(facecolor=(0.961, 0.616, 0.043), label=f"Risk avoided ({saved_ha:,.0f} ha)"),
-             Patch(facecolor=elite_cmap(1.00), label="ECO — remaining risk")]
+    leg_c = [Patch(facecolor=elite_cmap(0.35), label="ECO growth outside high-hazard"),
+             Patch(facecolor=(0.961, 0.616, 0.043), label=f"High-hazard growth avoided ({saved_ha:,.0f} ha)"),
+             Patch(facecolor=elite_cmap(1.00), label="ECO growth remaining in high-hazard")]
     if has_admin:
         leg_c += [Line2D([0],[0], color=BOUNDARY_IL,   lw=0.85, label="Province"),
                   Line2D([0],[0], color=BOUNDARY_ILCE, lw=0.40, linestyle="--", label="District")]
