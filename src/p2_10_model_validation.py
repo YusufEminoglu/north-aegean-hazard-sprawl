@@ -93,10 +93,9 @@ def rf_diagnostics():
         if len(train_indices) > 50_000:
             train_indices = RNG.choice(train_indices, 50_000, replace=False)
         fold_model = RandomForestClassifier(
-            n_estimators=100,
+            n_estimators=50,
             max_depth=10,
-            min_samples_split=5,
-            class_weight="balanced",
+            min_samples_split=2,
             n_jobs=-1,
             random_state=42,
         )

@@ -127,7 +127,14 @@ def calculate_2050_demand(lulc_2000, lulc_2020, method=None):
 
 
 def train_rf(drivers, lulc_2000, lulc_2020):
-    """Fit the selected R1 RF configuration to the 2020 urban state."""
+    """Fit the grid-search-selected RF configuration to the 2020 urban state
+    (50 trees, max_depth=10, min_samples_split=2). In the manuscript's
+    internal analysis tree, all 27 candidate configurations in a stratified
+    5-fold grid search over n_estimators x max_depth x min_samples_split tie
+    at cross-validated AUC = 1.0000 (manuscript Supplementary Table S6), so
+    50 trees is retained on parsimony grounds. The grid-search driver script
+    itself is not part of this public repository; this function reproduces
+    only the resulting, selected configuration."""
     del lulc_2000
     valid = (lulc_2020 > 0) & (lulc_2020 != 4)
     target = (lulc_2020 == 1).astype(np.uint8)
@@ -139,10 +146,9 @@ def train_rf(drivers, lulc_2000, lulc_2020):
         features, labels = features[sample], labels[sample]
 
     model = RandomForestClassifier(
-        n_estimators=100,
+        n_estimators=50,
         max_depth=10,
-        min_samples_split=5,
-        class_weight="balanced",
+        min_samples_split=2,
         oob_score=True,
         n_jobs=-1,
         random_state=RANDOM_SEED,
