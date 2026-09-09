@@ -26,6 +26,9 @@ EXPECTED_FIGURES = {
     "fig08_Exposure.png",
     "fig09_Demographic_Exposure.png",
     "fig10_Policy_Synthesis.png",
+    "fig11_Prioritization.png",
+    "fig12_WildfireSubcomponents.png",
+    "fig13_LocationMap.png",
 }
 
 
