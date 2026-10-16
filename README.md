@@ -19,10 +19,10 @@ This is the open research companion to a study of how urban expansion may inters
 <table>
   <tr>
     <td align="center"><strong>+312.5%</strong><br><sub>urban footprint, 1985–2022</sub></td>
-    <td align="center"><strong>31.7%</strong><br><sub>BAU growth in high / very-high hazard</sub></td>
-    <td align="center"><strong>5.4%</strong><br><sub>ECO exposure reduction ratio</sub></td>
-    <td align="center"><strong>0.820</strong><br><sub>flood validation ROC AUC</sub></td>
-    <td align="center"><strong>ρ ≥ 0.960</strong><br><sub>cross-scheme spatial robustness</sub></td>
+    <td align="center"><strong>36.1%</strong><br><sub>BAU growth in high / very-high hazard</sub></td>
+    <td align="center"><strong>3.3%</strong><br><sub>ECO exposure reduction ratio (1.2 pp)</sub></td>
+    <td align="center"><strong>0.782</strong><br><sub>flood validation ROC AUC</sub></td>
+    <td align="center"><strong>ρ ≥ 0.921</strong><br><sub>cross-scheme spatial robustness</sub></td>
   </tr>
 </table>
 
@@ -35,8 +35,8 @@ This is the open research companion to a study of how urban expansion may inters
 The scientific contribution is not another single-hazard map. It is the explicit coupling of observed urbanisation, forward land allocation, independently constructed hazard components, and demographic/agricultural asset exposure on one harmonised 30 m grid.
 
 - Historical urban land increased from 5,814.81 ha to 23,988.24 ha.
-- BAU allocates 3,126 ha of projected new growth to high or very-high hazard zones.
-- ECO redirects 170 ha of the most exposed growth, yet 30.0% remains in high-hazard corridors.
+- BAU allocates 3,564 ha of projected new growth to high or very-high hazard zones (36.1%).
+- The ECO mask relocates 950 ha of BAU high-hazard growth but allocates 833 ha to other high-hazard pixels, a net reduction of 116 ha (1.2 percentage points; ERR 3.3%); 34.9% of ECO growth remains in high-hazard corridors.
 - Jenks natural breaks replace fixed quintiles, so the high-hazard share is learned from the surface.
 - AHP, equal, rank-based, and PCA-derived fusion schemes remain strongly concordant.
 - GFD validation uses threshold-independent ROC AUC and reports the maximum-CSI operating point separately.
@@ -82,9 +82,9 @@ Third-party rasters are deliberately absent. [docs/data_sources.md](docs/data_so
 
 ~~~text
 north-aegean-hazard-sprawl/
-├── src/                    analysis, GEE export, validation, and figure code
+├── src/                    analysis, GEE export, validation, and figure code (src/as_run: scripts exactly as executed for the manuscript)
 ├── data/ahp/               versioned author-created weights and fusion matrix
-├── figures/png/            ten final author-generated figures
+├── figures/png/            thirteen final author-generated figures (ten main, three supplementary)
 ├── scripts/                AHP verification and pre-publication audit
 ├── docs/                   methods, provenance, reproducibility, project site
 ├── CITATION.cff            software and preferred article citation metadata

@@ -1,245 +1,205 @@
-"""Build the continuous two-model flood-susceptibility surface.
+"""
+Paper 2 - Flood Hazard Surface (Model A & B Fusion)
+=====================================================
+Calculates a continuous 1-5 flood hazard score by fusing two WLC models
+(weighted average of the two 1-5 factor scores; no z-standardisation).
 
-Model A combines HAND, slope, river distance, elevation, clay, maximum
-precipitation, and LULC permeability. Model B combines water distance,
-elevation, TPI, NDVI, and NDWI. Both WLC outputs are standardised before their
-0.60/0.40 fusion, matching the revised manuscript.
+Model A (Physical-Geomorphic):
+  - Slope (30%)
+  - Distance to river (30%)
+  - Elevation (15%)
+  - Soil clay content (10%)
+  - Max precipitation (10%)
+  - LULC permeability (5%)
+
+Model B (Remote Sensing / Spectral):
+  - Distance to permanent water (30%)
+  - TPI / Topographic Position Index (30%)
+  - Elevation (20%)
+  - NDWI (15%)
+  - NDVI (5%)
+
+Fusion:
+  Final Flood Hazard = 0.6 * Model A + 0.4 * Model B
 """
 
-from __future__ import annotations
-
-from pathlib import Path
-
-import numpy as np
 import rasterio
-from rasterio.warp import Resampling, reproject
-
+import numpy as np
+from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 INTERIM = PROJECT_ROOT / "data" / "02_interim" / "paper2"
 PROCESSED = PROJECT_ROOT / "data" / "03_processed" / "paper2"
+
 REF_RASTER = INTERIM / "p2_srtm_elevation_clipped.tif"
 
-MODEL_A_WEIGHTS = {
-    "hand": 0.216,
-    "slope": 0.209,
-    "river_distance": 0.209,
-    "elevation": 0.105,
-    "clay": 0.105,
-    "precipitation": 0.105,
-    "permeability": 0.051,
-}
-MODEL_B_WEIGHTS = {
-    "water_distance": 0.30,
-    "elevation": 0.25,
-    "tpi": 0.20,
-    "ndvi": 0.15,
-    "ndwi": 0.10,
-}
-
-
-def reclass_slope(arr: np.ndarray) -> np.ndarray:
-    out = np.ones_like(arr, dtype=np.float32)
+def reclass_slope(arr):
+    # <2 (5), 2-5 (4), 5-10 (3), 10-20 (2), >20 (1)
+    out = np.ones_like(arr)
     out[(arr >= 0) & (arr < 2)] = 5
     out[(arr >= 2) & (arr < 5)] = 4
     out[(arr >= 5) & (arr < 10)] = 3
     out[(arr >= 10) & (arr < 20)] = 2
     return out
 
-
-def reclass_elevation(arr: np.ndarray) -> np.ndarray:
-    out = np.ones_like(arr, dtype=np.float32)
+def reclass_elevation(arr):
+    # <10 (5), 10-30 (4), 30-100 (3), 100-300 (2), >300 (1)
+    out = np.ones_like(arr)
     out[(arr >= -100) & (arr < 10)] = 5
     out[(arr >= 10) & (arr < 30)] = 4
     out[(arr >= 30) & (arr < 100)] = 3
     out[(arr >= 100) & (arr < 300)] = 2
     return out
 
-
-def reclass_distance(arr: np.ndarray) -> np.ndarray:
-    out = np.ones_like(arr, dtype=np.float32)
+def reclass_dist(arr):
+    # <50 (5), 50-200 (4), 200-500 (3), 500-1000 (2), >1000 (1)
+    out = np.ones_like(arr)
     out[(arr >= 0) & (arr < 50)] = 5
     out[(arr >= 50) & (arr < 200)] = 4
     out[(arr >= 200) & (arr < 500)] = 3
     out[(arr >= 500) & (arr < 1000)] = 2
     return out
 
-
-def reclass_clay(arr: np.ndarray, valid: np.ndarray) -> np.ndarray:
-    clay = arr.copy()
-    values = clay[valid & np.isfinite(clay)]
-    if values.size and np.nanpercentile(values, 99) > 100:
-        clay /= 10.0
-    out = np.ones_like(clay, dtype=np.float32)
-    out[clay > 40] = 5
-    out[(clay > 30) & (clay <= 40)] = 4
-    out[(clay > 20) & (clay <= 30)] = 3
-    out[(clay > 10) & (clay <= 20)] = 2
+def reclass_clay(arr):
+    # >40% (5), 30-40 (4), 20-30 (3), 10-20 (2), <10 (1)
+    # Note: soilgrids clay is 0-100 or 0-1000, let's assume 0-100 here.
+    # Usually it's in % or g/kg. In our case it's mostly %.
+    out = np.ones_like(arr)
+    out[arr > 40] = 5
+    out[(arr > 30) & (arr <= 40)] = 4
+    out[(arr > 20) & (arr <= 30)] = 3
+    out[(arr > 10) & (arr <= 20)] = 2
     return out
 
-
-def reclass_tpi(arr: np.ndarray) -> np.ndarray:
-    out = np.ones_like(arr, dtype=np.float32)
+def reclass_tpi(arr):
+    # <-5 (Valley) = 5, -5 to -1 = 4, -1 to 1 (Flat) = 3, 1 to 5 = 2, >5 (Ridge) = 1
+    out = np.ones_like(arr)
     out[arr < -5] = 5
     out[(arr >= -5) & (arr < -1)] = 4
     out[(arr >= -1) & (arr <= 1)] = 3
     out[(arr > 1) & (arr <= 5)] = 2
     return out
 
-
-def reclass_ndvi(arr: np.ndarray) -> np.ndarray:
-    out = np.ones_like(arr, dtype=np.float32)
+def reclass_ndvi(arr):
+    # <0.1 (5), 0.1-0.3 (4), 0.3-0.5 (3), 0.5-0.7 (2), >0.7 (1)
+    out = np.ones_like(arr)
     out[arr < 0.1] = 5
     out[(arr >= 0.1) & (arr < 0.3)] = 4
     out[(arr >= 0.3) & (arr < 0.5)] = 3
     out[(arr >= 0.5) & (arr < 0.7)] = 2
     return out
 
-
-def reclass_ndwi(arr: np.ndarray) -> np.ndarray:
-    out = np.ones_like(arr, dtype=np.float32)
+def reclass_ndwi(arr):
+    # >0.1 (wet) (5), 0 to 0.1 (4), -0.1 to 0 (3), -0.2 to -0.1 (2), <-0.2 (dry) (1)
+    out = np.ones_like(arr)
     out[arr > 0.1] = 5
     out[(arr > 0) & (arr <= 0.1)] = 4
     out[(arr > -0.1) & (arr <= 0)] = 3
     out[(arr > -0.2) & (arr <= -0.1)] = 2
     return out
 
-
-def quantile_score(arr: np.ndarray, valid: np.ndarray) -> np.ndarray:
-    values = arr[valid & np.isfinite(arr)]
-    if not values.size:
-        raise ValueError("Cannot score an empty precipitation surface.")
-    breaks = np.percentile(values, [20, 40, 60, 80])
-    return (np.digitize(arr, breaks, right=True) + 1).astype(np.float32)
-
-
-def hand_score(arr: np.ndarray) -> np.ndarray:
-    out = np.ones_like(arr, dtype=np.float32)
-    out[(arr >= 0) & (arr < 2)] = 5
-    out[(arr >= 2) & (arr < 5)] = 4
-    out[(arr >= 5) & (arr < 10)] = 3
-    out[(arr >= 10) & (arr < 20)] = 2
-    return out
-
-
-def read_aligned(path: Path, ref_meta: dict) -> np.ndarray:
+def read_resampled(path, ref_meta):
+    """Read a raster and ensure it aligns with the reference."""
     if not path.exists():
-        raise FileNotFoundError(f"Required flood input is missing: {path}")
-    destination = np.full(
-        (ref_meta["height"], ref_meta["width"]), np.nan, dtype=np.float32
-    )
-    with rasterio.open(path) as source:
-        reproject(
-            source=rasterio.band(source, 1),
-            destination=destination,
-            src_transform=source.transform,
-            src_crs=source.crs,
-            src_nodata=source.nodata,
+        print(f"  [MISSING] {path.name}")
+        return None
+    out = np.zeros((ref_meta["height"], ref_meta["width"]), dtype=np.float32)
+    with rasterio.open(path) as src:
+        from rasterio.warp import reproject as warp_r, Resampling
+        warp_r(
+            source=rasterio.band(src, 1),
+            destination=out,
+            src_transform=src.transform,
+            src_crs=src.crs,
             dst_transform=ref_meta["transform"],
             dst_crs=ref_meta["crs"],
-            dst_nodata=np.nan,
             resampling=Resampling.bilinear,
         )
-    return destination
-
-
-def standardize(arr: np.ndarray, valid: np.ndarray) -> np.ndarray:
-    values = arr[valid & np.isfinite(arr)]
-    if not values.size or np.isclose(values.std(), 0):
-        raise ValueError("Cannot standardise an empty or constant flood component.")
-    out = np.full_like(arr, np.nan, dtype=np.float32)
-    out[valid] = (arr[valid] - values.mean()) / values.std()
     return out
 
-
-def write_float(path: Path, arr: np.ndarray, meta: dict, valid: np.ndarray) -> None:
-    output = arr.astype(np.float32, copy=True)
-    output[~valid] = -9999.0
-    out_meta = meta.copy()
-    out_meta.update(dtype=rasterio.float32, count=1, nodata=-9999.0)
-    with rasterio.open(path, "w", **out_meta) as target:
-        target.write(output, 1)
-
-
-def run_flood_hazard() -> None:
-    print("== Flood hazard: standardised Model A/B fusion ==")
-    PROCESSED.mkdir(parents=True, exist_ok=True)
-
-    with rasterio.open(REF_RASTER) as reference:
-        ref_meta = reference.meta.copy()
-        ref_arr = reference.read(1).astype(np.float32)
-        nodata = reference.nodata
-    valid = np.isfinite(ref_arr)
-    if nodata is not None:
-        valid &= ref_arr != nodata
-
-    inputs = {
-        "slope": read_aligned(INTERIM / "p2_srtm_slope_clipped.tif", ref_meta),
-        "elevation": read_aligned(INTERIM / "p2_srtm_elevation_clipped.tif", ref_meta),
-        "river_distance": read_aligned(INTERIM / "p2_river_distance_clipped.tif", ref_meta),
-        "water_distance": read_aligned(INTERIM / "p2_water_distance_clipped.tif", ref_meta),
-        "clay": read_aligned(INTERIM / "p2_soilgrids_clay_clipped.tif", ref_meta),
-        "tpi": read_aligned(INTERIM / "p2_srtm_tpi_clipped.tif", ref_meta),
-        "ndvi": read_aligned(INTERIM / "p2_ndvi_summer_2024_clipped.tif", ref_meta),
-        "ndwi": read_aligned(INTERIM / "p2_ndwi_summer_2024_clipped.tif", ref_meta),
-        "precipitation": read_aligned(
-            INTERIM / "p2_worldclim_bio13_maxprecip_clipped.tif", ref_meta
-        ),
-        "hand": read_aligned(INTERIM / "p2_merit_hand_clipped.tif", ref_meta),
-    }
-    for arr in inputs.values():
-        valid &= np.isfinite(arr)
-
+def run_flood_hazard():
+    print("== Flood Hazard Processing (Model A & B Fusion) ==")
+    
+    with rasterio.open(REF_RASTER) as ref:
+        ref_meta = ref.meta.copy()
+        ref_arr = ref.read(1)
+        nodata = ref.nodata
+    
+    valid_mask = (ref_arr != nodata) if nodata is not None else np.ones(ref_arr.shape, bool)
+    
+    # Load inputs
+    print("  Loading rasters...")
+    slope = read_resampled(INTERIM / "p2_srtm_slope_clipped.tif", ref_meta)
+    elev = read_resampled(INTERIM / "p2_srtm_elevation_clipped.tif", ref_meta)
+    riv_d = read_resampled(INTERIM / "p2_river_distance_clipped.tif", ref_meta)
+    wat_d = read_resampled(INTERIM / "p2_water_distance_clipped.tif", ref_meta)
+    clay = read_resampled(INTERIM / "p2_soilgrids_clay_clipped.tif", ref_meta)
+    tpi = read_resampled(INTERIM / "p2_srtm_tpi_clipped.tif", ref_meta)
+    ndvi = read_resampled(INTERIM / "p2_ndvi_summer_2024_clipped.tif", ref_meta)
+    ndwi = read_resampled(INTERIM / "p2_ndwi_summer_2024_clipped.tif", ref_meta)
+    precip = read_resampled(INTERIM / "p2_worldclim_bio13_maxprecip_clipped.tif", ref_meta)
+    
+    # Optional LULC 2020 for permeability
     lulc_path = PROCESSED / "lulc_simplified_2020.tif"
-    if not lulc_path.exists():
-        raise FileNotFoundError(f"Required permeability layer is missing: {lulc_path}")
-    with rasterio.open(lulc_path) as source:
-        lulc = source.read(1)
-    if lulc.shape != ref_arr.shape:
-        raise ValueError("LULC permeability raster is not aligned to the reference grid.")
+    if lulc_path.exists():
+        with rasterio.open(lulc_path) as src:
+            lulc = src.read(1)
+        # Urban(1), Agriculture(2), Forest(3), Water(4), Bare(5)
+        perm = np.ones_like(lulc, dtype=np.float32)
+        perm[lulc == 4] = 5 # Water -> 5
+        perm[lulc == 1] = 4 # Urban -> 4
+        perm[lulc == 5] = 3 # Bare -> 3
+        perm[lulc == 2] = 2 # Ag -> 2
+        perm[lulc == 3] = 1 # Forest -> 1
+    else:
+        perm = np.full(ref_arr.shape, 3.0, dtype=np.float32)
 
-    permeability = np.ones_like(lulc, dtype=np.float32)
-    permeability[lulc == 4] = 5
-    permeability[lulc == 1] = 4
-    permeability[lulc == 5] = 3
-    permeability[lulc == 2] = 2
-    permeability[lulc == 3] = 1
+    # Precipitation dynamic reclass (quintiles)
+    precip_score = np.ones_like(precip)
+    if precip is not None:
+        p_valid = precip[valid_mask & (precip > 0)]
+        if len(p_valid) > 0:
+            q = np.percentile(p_valid, [20, 40, 60, 80])
+            precip_score[precip > q[3]] = 5
+            precip_score[(precip <= q[3]) & (precip > q[2])] = 4
+            precip_score[(precip <= q[2]) & (precip > q[1])] = 3
+            precip_score[(precip <= q[1]) & (precip > q[0])] = 2
 
-    scores_a = {
-        "hand": hand_score(inputs["hand"]),
-        "slope": reclass_slope(inputs["slope"]),
-        "river_distance": reclass_distance(inputs["river_distance"]),
-        "elevation": reclass_elevation(inputs["elevation"]),
-        "clay": reclass_clay(inputs["clay"], valid),
-        "precipitation": quantile_score(inputs["precipitation"], valid),
-        "permeability": permeability,
-    }
-    model_a = sum(scores_a[key] * weight for key, weight in MODEL_A_WEIGHTS.items())
+    # Model A: Geomorphic (six factors; HAND is not an input of the surface used in the paper)
+    print("  Computing Model A (Geomorphic)...")
+    mod_A = (
+        reclass_slope(slope) * 0.30 +
+        reclass_dist(riv_d) * 0.30 +
+        reclass_elevation(elev) * 0.15 +
+        reclass_clay(clay) * 0.10 +
+        precip_score * 0.10 +
+        perm * 0.05
+    )
 
-    scores_b = {
-        "water_distance": reclass_distance(inputs["water_distance"]),
-        "elevation": reclass_elevation(inputs["elevation"]),
-        "tpi": reclass_tpi(inputs["tpi"]),
-        "ndvi": reclass_ndvi(inputs["ndvi"]),
-        "ndwi": reclass_ndwi(inputs["ndwi"]),
-    }
-    model_b = sum(scores_b[key] * weight for key, weight in MODEL_B_WEIGHTS.items())
+    # Model B: Spectral
+    print("  Computing Model B (Spectral)...")
+    mod_B = (
+        reclass_dist(wat_d) * 0.30 +
+        reclass_tpi(tpi) * 0.30 +
+        reclass_elevation(elev) * 0.20 +
+        reclass_ndwi(ndwi) * 0.15 +
+        reclass_ndvi(ndvi) * 0.05
+    )
 
-    model_a_z = standardize(model_a, valid)
-    model_b_z = standardize(model_b, valid)
-    flood = 0.60 * model_a_z + 0.40 * model_b_z
+    # Fusion
+    print("  Fusing A and B...")
+    flood = mod_A * 0.60 + mod_B * 0.40
+    flood[~valid_mask] = -9999.0
 
-    write_float(PROCESSED / "flood_model_a_standardized.tif", model_a_z, ref_meta, valid)
-    write_float(PROCESSED / "flood_model_b_standardized.tif", model_b_z, ref_meta, valid)
-    write_float(PROCESSED / "flood_hazard.tif", flood, ref_meta, valid)
+    out_path = PROCESSED / "flood_hazard.tif"
+    ref_meta.update(dtype=rasterio.float32, nodata=-9999.0)
+    with rasterio.open(out_path, "w", **ref_meta) as out:
+        out.write(flood.astype(np.float32), 1)
 
-    values = flood[valid]
-    print(f"  valid pixels: {values.size:,}")
-    print(f"  fused range: [{values.min():.3f}, {values.max():.3f}]")
-    print("  saved: flood_model_a_standardized.tif")
-    print("  saved: flood_model_b_standardized.tif")
-    print("  saved: flood_hazard.tif")
-
+    v_flood = flood[valid_mask]
+    print(f"  Range: [{v_flood.min():.2f}, {v_flood.max():.2f}]")
+    print(f"  Output saved to: {out_path.name}")
+    print("  Done.")
 
 if __name__ == "__main__":
     run_flood_hazard()

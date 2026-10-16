@@ -8,7 +8,7 @@ data/ahp/{subcomponent_weights,weight_schemes,sensitivity_correlations}.csv
 were asserted values with no generating computation anywhere in this
 repository. This script provides one.
 
-  A. Sub-component matrices. The flood Model A (7 factors), flood Model B
+  A. Sub-component matrices. The flood Model A (6 factors), flood Model B
      (5 factors) and seismic (3 factors) sub-weights are already published
      (hardcoded in p2_05/p2_06). Given a target weight vector w, the pairwise
      matrix a_ij = w_i / w_j is the *unique* perfectly consistent Saaty
@@ -79,13 +79,13 @@ def run_subcomponent_verification() -> None:
     print("[A] Sub-component pairwise matrix reconstruction + verification")
     flood_a = reconstruct_and_verify(
         "Flood Model A",
-        ["HAND", "Slope", "River_dist", "Elevation", "Clay", "Max_precip", "LULC_perm"],
-        [0.216, 0.209, 0.209, 0.105, 0.105, 0.105, 0.051],
+        ["Slope", "River_dist", "Elevation", "Clay", "Max_precip", "LULC_perm"],
+        [0.30, 0.30, 0.15, 0.10, 0.10, 0.05],
     )
     flood_b = reconstruct_and_verify(
         "Flood Model B",
-        ["Water_dist", "Elevation", "TPI", "NDVI", "NDWI"],
-        [0.30, 0.25, 0.20, 0.15, 0.10],
+        ["Water_dist", "TPI", "Elevation", "NDWI", "NDVI"],
+        [0.30, 0.30, 0.20, 0.15, 0.05],
     )
     seismic = reconstruct_and_verify(
         "Seismic", ["Fault_proximity", "PGA", "Site_amplification"], [0.40, 0.40, 0.20],

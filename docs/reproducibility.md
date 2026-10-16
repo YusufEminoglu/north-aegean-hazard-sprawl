@@ -61,6 +61,23 @@ python src/p2_09_multi_hazard_fusion.py
 python src/p2_10_model_validation.py
 ~~~
 
+Optional tuning and revision-round scripts, each re-runnable once the processed layers above exist:
+
+~~~bash
+python src/p2_04b_rf_grid_search.py                  # 27-configuration RF grid search (manuscript Table S6)
+python src/p2_11_dsi_masterplan_ingest.py            # DSI master-plan layers
+python src/p2_12_wildfire_seismic_validation.py      # wildfire / seismic independent checks
+python src/p2_13_uncertainty_propagation.py          # AHP-weight Monte Carlo
+python src/p2_14_markov_demand_rerun.py              # Markov demand pathway
+python src/p2_15_eco_penalty_grounding.py            # ECO penalty vs DSI buffers
+python src/p2_16_ahp_full_verification.py            # four weighting schemes
+python src/p2_17_wildfire_exclusion_sensitivity.py   # wildfire-exclusion sensitivity
+python src/p2_18_prioritization_weight_sensitivity.py # prioritisation weight sensitivity
+python src/p2_19_r4_diagnostics.py                   # gross/net relocation, data-gap and NbS bookkeeping
+~~~
+
+**Scope of reproducibility.** The scripts exactly as executed to generate the reported layers are in <code>src/as_run/</code> (see its README); <code>src/</code> holds a cleaned, seeded re-implementation of the same method that reproduces the reported pattern but not the exact pixel allocation. The RF grid-search driver and the sensitivity and diagnostic scripts are included. Provider rasters and intermediate layers are not redistributed, so the pipeline can be re-run only after the inputs are obtained as described in <code>data_sources.md</code>; the figures in <code>figures/png</code> and the compact tables are the deposited results.
+
 Some provider-specific exports are split into <code>p2_00b</code>–<code>p2_00d</code>. Run only the exporters required for inputs you do not already have.
 
 ## 5. Regenerate figures
@@ -86,4 +103,4 @@ python scripts/verify_ahp.py
 python scripts/publication_audit.py
 ~~~
 
-The audit also asserts that exactly ten author figures are present and that no PDF, manuscript source, model object, raw raster, private Earth Engine identifier, or credential-like string is publishable.
+The audit also asserts that exactly thirteen author figures are present and that no PDF, manuscript source, model object, raw raster, private Earth Engine identifier, or credential-like string is publishable.

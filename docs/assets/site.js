@@ -38,11 +38,11 @@ function animateMetric(element) {
 const scenarios = {
   bau: {
     description: "Physical exclusions only; growth follows learned accessibility and agglomeration patterns.",
-    share: "31.7", area: "3,126 ha", vh: "2,020 ha", hci: "0.89"
+    share: "36.1", area: "3,564 ha", vh: "2,319 ha", hci: "1.00"
   },
   eco: {
     description: "Agricultural, forest, and riparian penalties redirect allocation while keeping total demand unchanged.",
-    share: "30.0", area: "2,956 ha", vh: "1,774 ha", hci: "0.84"
+    share: "34.9", area: "3,448 ha", vh: "2,062 ha", hci: "0.97"
   }
 };
 qsa("[data-scenario]").forEach(button => button.addEventListener("click", () => {
@@ -63,8 +63,8 @@ qsa("[data-scenario]").forEach(button => button.addEventListener("click", () => 
 const schemes = {
   ahp: [35, 35, 20, 10],
   equal: [25, 25, 25, 25],
-  rank: [39, 39, 13, 10],
-  pca: [7, 81, 10, 2]
+  rank: [52, 27, 15, 6],
+  pca: [6, 89, 3, 2]
 };
 const barIds = ["flood", "seismic", "bio", "fire"];
 function renderScheme(name) {

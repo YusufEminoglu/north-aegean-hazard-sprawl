@@ -132,9 +132,9 @@ def train_rf(drivers, lulc_2000, lulc_2020):
     internal analysis tree, all 27 candidate configurations in a stratified
     5-fold grid search over n_estimators x max_depth x min_samples_split tie
     at cross-validated AUC = 1.0000 (manuscript Supplementary Table S6), so
-    50 trees is retained on parsimony grounds. The grid-search driver script
-    itself is not part of this public repository; this function reproduces
-    only the resulting, selected configuration."""
+    50 trees is retained on parsimony grounds. The grid-search driver is
+    ``p2_04b_rf_grid_search.py``; this function fits only the resulting,
+    selected configuration."""
     del lulc_2000
     valid = (lulc_2020 > 0) & (lulc_2020 != 4)
     target = (lulc_2020 == 1).astype(np.uint8)

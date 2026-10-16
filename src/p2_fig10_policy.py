@@ -331,7 +331,7 @@ def create_fig10():
     add_province_labels(axes[1], il_gdf, basin_geom)
 
     stats_box(axes[1],
-              f"NbS priority area  : {nbs_ha:,.0f} ha\n"
+              f"NbS screening area : {nbs_ha:,.0f} ha (top quartile of basin)\n"
               f"Score threshold    : >{nbs_q75:.2f}\n"
               f"Weights: Flood 50% | Bio 30% | Canopy 20%",
               loc="upper right")
@@ -344,7 +344,7 @@ def create_fig10():
                   Line2D([0],[0], color=BOUNDARY_ILCE, lw=0.40, linestyle="--", label="District")]
     axes[1].legend(handles=leg_b, loc="lower left", fontsize=7.5,
                    frameon=True, facecolor="white", edgecolor=BOUNDARY_ILCE,
-                   title="NbS Priority", title_fontsize=8)
+                   title="NbS screening footprint", title_fontsize=8)
     axes[1].set_title("(b)", loc="left", fontweight="bold", fontsize=18, pad=8)
     axes[1].set_xticks([]); axes[1].set_yticks([])
 
@@ -380,15 +380,22 @@ def create_fig10():
 
     eco_safe_ha = float((new_eco & ~high_haz & valid).sum()) * pixel_ha
     eco_risk_ha = float((new_eco & high_haz  & valid).sum()) * pixel_ha
+    # R4: the amber 'relocated' area is a GROSS figure. ECO also converts
+    # high-hazard pixels that BAU leaves unconverted (countervailing), so the
+    # net class 4-5 reduction is the gross figure minus the countervailing one.
+    eco_only_high_ha = float((new_eco & high_haz & ~new_bau & valid).sum()) * pixel_ha
+    net_ha = saved_ha - eco_only_high_ha
     stats_box(axes[2],
-              f"High-hazard growth avoided (vs BAU): {saved_ha:,.0f} ha\n"
-              f"ECO growth outside high-hazard      : {eco_safe_ha:,.0f} ha\n"
-              f"ECO growth remaining in high-hazard  : {eco_risk_ha:,.0f} ha",
+              f"BAU relocated (gross): {saved_ha:,.0f} ha\n"
+              f"ECO-only high-hazard: {eco_only_high_ha:,.0f} ha\n"
+              f"Net class 4-5 reduction: {net_ha:,.0f} ha\n"
+              f"ECO outside high-hazard: {eco_safe_ha:,.0f} ha\n"
+              f"ECO in high-hazard: {eco_risk_ha:,.0f} ha",
               loc="upper right")
 
     leg_c = [Patch(facecolor=elite_cmap(0.35), label="ECO growth outside high-hazard"),
-             Patch(facecolor=(0.961, 0.616, 0.043), label=f"High-hazard growth avoided ({saved_ha:,.0f} ha)"),
-             Patch(facecolor=elite_cmap(1.00), label="ECO growth remaining in high-hazard")]
+             Patch(facecolor=(0.961, 0.616, 0.043), label=f"BAU high-hazard relocated ({saved_ha:,.0f} ha)"),
+             Patch(facecolor=elite_cmap(1.00), label="ECO growth in high-hazard")]
     if has_admin:
         leg_c += [Line2D([0],[0], color=BOUNDARY_IL,   lw=0.85, label="Province"),
                   Line2D([0],[0], color=BOUNDARY_ILCE, lw=0.40, linestyle="--", label="District")]
@@ -401,7 +408,10 @@ def create_fig10():
     plt.savefig(out_path, dpi=300, bbox_inches="tight", facecolor="white")
     plt.close()
     print(f"  Saved: {out_path.relative_to(PROJECT_ROOT)}")
-    print(f"  No-build: {nb_ha:,.0f} ha | NbS: {nbs_ha:,.0f} ha | Risk avoided: {saved_ha:,.0f} ha")
+    print(f"  No-build: {nb_ha:,.0f} ha | NbS: {nbs_ha:,.0f} ha | BAU high-hazard relocated (gross): {saved_ha:,.0f} ha")
+    print(f"reloc_bau_only_high_ha,{saved_ha:.2f}")
+    print(f"reloc_eco_only_high_ha,{eco_only_high_ha:.2f}")
+    print(f"reloc_net_high_ha,{net_ha:.2f}")
 
 
 if __name__ == "__main__":
