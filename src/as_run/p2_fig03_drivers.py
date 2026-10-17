@@ -82,7 +82,10 @@ def create_fig03_advanced():
             unit = "(m)"
         elif "Slope" in name:
             unit = "(°)"
-        elif "Canopy" in name or "Clay" in name:
+        elif "Canopy" in name:
+            name = "Canopy Height"
+            unit = "(m)"
+        elif "Clay" in name:
             unit = "(%)"
         elif "Ndvi" in name:
             unit = "(Index)"

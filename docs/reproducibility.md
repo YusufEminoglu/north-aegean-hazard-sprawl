@@ -74,6 +74,8 @@ python src/p2_16_ahp_full_verification.py            # four weighting schemes
 python src/p2_17_wildfire_exclusion_sensitivity.py   # wildfire-exclusion sensitivity
 python src/p2_18_prioritization_weight_sensitivity.py # prioritisation weight sensitivity
 python src/p2_19_r4_diagnostics.py                   # gross/net relocation, data-gap and NbS bookkeeping
+python src/as_run/p2_20_district_exposure.py         # district table (as-run folder)
+python src/as_run/p2_21_ca_realisations.py           # allocation-stochasticity check (needs the model object produced by p2_04)
 ~~~
 
 **Scope of reproducibility.** The scripts exactly as executed to generate the reported layers are in <code>src/as_run/</code> (see its README); <code>src/</code> holds a cleaned, seeded re-implementation of the same method that reproduces the reported pattern but not the exact pixel allocation. The RF grid-search driver and the sensitivity and diagnostic scripts are included. Provider rasters and intermediate layers are not redistributed, so the pipeline can be re-run only after the inputs are obtained as described in <code>data_sources.md</code>; the figures in <code>figures/png</code> and the compact tables are the deposited results.
@@ -82,7 +84,7 @@ Some provider-specific exports are split into <code>p2_00b</code>–<code>p2_00d
 
 ## 5. Regenerate figures
 
-Figure scripts are in <code>src/p2_fig01_*.py</code> through <code>src/p2_fig10_*.py</code>. They expect completed processed outputs. Final authored PNGs are included in <code>figures/png</code> for inspection without third-party inputs.
+Figure scripts are in <code>src/p2_fig01_*.py</code> through <code>src/p2_fig13_*.py</code>. They expect completed processed outputs. Final authored PNGs are included in <code>figures/png</code> for inspection without third-party inputs.
 
 ## 6. Change the demand pathway
 

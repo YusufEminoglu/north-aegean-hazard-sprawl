@@ -46,7 +46,7 @@ The scientific contribution is not another single-hazard map. It is the explicit
 ~~~mermaid
 flowchart LR
     A["1985–2022 LULC<br>+ 11 spatial drivers"] --> B["RF urban<br>suitability"]
-    B --> C{"Seeded CA<br>same 2050 demand"}
+    B --> C{"Stochastic CA<br>same 2050 demand"}
     C --> D["BAU"]
     C --> E["ECO"]
     F["Flood"] --> J["AHP fusion<br>+ Jenks classes"]

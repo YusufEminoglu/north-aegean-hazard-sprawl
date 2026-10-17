@@ -23,7 +23,7 @@ No third-party raster or vector is redistributed in this repository. Obtain each
 | Sentinel-2 SR harmonised | Copernicus; JJA 2019–2024 | Summer EVI | [Earth Engine catalogue](https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S2_SR_HARMONIZED); Copernicus Sentinel data terms apply |
 | GABAM burned area | GABAM; 1990–2021 | Burn recurrence | [Community catalogue record](https://gee-community-catalog.org/projects/gabam/); follow cited source and catalogue terms |
 | Active faults | GEM Global Active Faults / EMME-SHARE; static vector | Fault-proximity hazard | [GEM active-fault repository](https://github.com/cossatot/gem-global-active-faults); repository documents CC BY-SA terms |
-| PGA | AFAD national model / ESHM20; static | Seismic ground motion | [ESHM20 overview](https://hazard.efehr.org/en/Documentation/specific-hazard-models/europe/eshm2020-overview/); follow EFEHR/AFAD access and citation requirements |
+| PGA | ESHM20 (475-year PGA); static | Seismic ground motion | [ESHM20 overview](https://hazard.efehr.org/en/Documentation/specific-hazard-models/europe/eshm2020-overview/); follow EFEHR/AFAD access and citation requirements |
 | GRIP road network | GLOBIO / GRIP4; static vector | Road accessibility | [GRIP download page](https://www.globio.info/download-grip-dataset); confirm product conditions at source |
 
 ## Processing services
