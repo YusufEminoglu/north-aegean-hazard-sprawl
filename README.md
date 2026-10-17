@@ -32,7 +32,7 @@ This is the open research companion to a study of how urban expansion may inters
 
 ## Why this repository matters
 
-The scientific contribution is not another single-hazard map. It is the explicit coupling of observed urbanisation, forward land allocation, independently constructed hazard components, and demographic/agricultural asset exposure on one harmonised 30 m grid.
+The scientific contribution is not another single-hazard map. It is the explicit coupling of observed urbanisation, forward land allocation, independently constructed hazard components, and demographic and agricultural-land exposure on one harmonised 30 m grid.
 
 - Historical urban land increased from 5,814.81 ha to 23,988.24 ha.
 - BAU allocates 3,564 ha of projected new growth to high or very-high hazard zones (36.1%).
