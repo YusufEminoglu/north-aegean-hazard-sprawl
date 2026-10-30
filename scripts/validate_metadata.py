@@ -11,6 +11,7 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 REPOSITORY_URL = "https://github.com/YusufEminoglu/north-aegean-hazard-sprawl"
+ARTICLE_DOI = "10.1016/j.uclim.2026.103204"
 ORCIDS = {
     "Yusuf Eminoğlu": "https://orcid.org/0009-0005-6000-2934",
     "Kemal Mert Çubukçu": "https://orcid.org/0000-0003-3604-7014",
@@ -37,7 +38,7 @@ def no_doi(value, location="root"):
         for key, child in value.items():
             if key.lower() == "doi":
                 raise AssertionError(
-                    f"DOI field must remain absent before acceptance: {location}"
+                    f"Software DOI must remain absent until archived: {location}"
                 )
             no_doi(child, f"{location}.{key}")
     elif isinstance(value, list):
@@ -58,12 +59,12 @@ def validate_citation():
     actual = {full_name(author): author["orcid"] for author in citation["authors"]}
     assert actual == ORCIDS
     preferred = citation["preferred-citation"]
-    assert "under review" in preferred["notes"].lower()
+    assert preferred["doi"] == ARTICLE_DOI
     preferred_orcids = {
         full_name(author): author["orcid"] for author in preferred["authors"]
     }
     assert preferred_orcids == ORCIDS
-    no_doi(citation)
+    no_doi({k: v for k, v in citation.items() if k != "preferred-citation"})
 
 
 def validate_zenodo():

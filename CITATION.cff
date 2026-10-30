@@ -28,7 +28,7 @@ keywords:
   - Türkiye
 preferred-citation:
   type: article
-  title: "Future Spatial Footprints of Natural Hazards: Modelling Demographic and Agricultural Asset Exposure through Cellular Automata and Cloud-Native Technologies in the North Aegean Basin, Türkiye"
+  title: "Future spatial footprints of natural hazards: Multi-hazard exposure modelling through cellular automata in the North Aegean Basin, Türkiye"
   authors:
     - family-names: "Eminoğlu"
       given-names: "Yusuf"
@@ -40,4 +40,7 @@ preferred-citation:
   publisher:
     name: "Elsevier"
   year: 2026
-  notes: "Manuscript under review; DOI pending acceptance."
+  volume: 70
+  start: 103204
+  doi: "10.1016/j.uclim.2026.103204"
+  url: "https://www.sciencedirect.com/science/article/pii/S2212095526004360"

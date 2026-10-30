@@ -9,5 +9,5 @@ must be obtained from its original provider and remains under that provider's
 licence. See docs/data_sources.md.
 
 The publisher-formatted article PDF and the manuscript source are deliberately
-excluded. Until a DOI and sharing terms are confirmed, cite the manuscript
-metadata in CITATION.cff and link to the article record after acceptance.
+excluded. The article is published in Urban Climate 70 (2026) 103204,
+https://doi.org/10.1016/j.uclim.2026.103204; please cite and read it there.

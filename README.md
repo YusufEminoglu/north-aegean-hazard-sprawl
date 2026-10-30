@@ -14,7 +14,7 @@
 
 This is the open research companion to a study of how urban expansion may intersect flood, seismic, bio-climatic, and wildfire hazard across the North Aegean Basin, Türkiye. It connects a 37-year land-cover record to an RF–FLUS-style cellular automaton, tests two demand-equivalent 2050 planning scenarios, and turns the resulting exposure patterns into planning-ready evidence.
 
-> The manuscript is under review at Urban Climate. No article DOI has been assigned. This repository contains code, author-created figures, and compact parameter tables—not the manuscript, publisher PDF, or third-party geospatial data.
+> Published in *Urban Climate* 70 (2026), 103204: [doi.org/10.1016/j.uclim.2026.103204](https://doi.org/10.1016/j.uclim.2026.103204). This repository contains code, author-created figures, and compact parameter tables—not the manuscript, publisher PDF, or third-party geospatial data.
 
 <table>
   <tr>
@@ -125,7 +125,9 @@ The only full pairwise matrix released here is the four-component fusion matrix 
 
 ## Citation
 
-Use the repository’s “Cite this repository” control, powered by [CITATION.cff](CITATION.cff). Until the article is accepted, please treat the preferred article metadata as “under review” and do not invent a DOI.
+Eminoğlu, Y., & Çubukçu, K. M. (2026). Future spatial footprints of natural hazards: Multi-hazard exposure modelling through cellular automata in the North Aegean Basin, Türkiye. *Urban Climate*, 70, 103204. https://doi.org/10.1016/j.uclim.2026.103204
+
+The repository’s “Cite this repository” control gives the same record, powered by [CITATION.cff](CITATION.cff). Commit [`a28f40a`](https://github.com/YusufEminoglu/north-aegean-hazard-sprawl/commit/a28f40a) corresponds to the results reported in the article.
 
 ## Licence and attribution
 
